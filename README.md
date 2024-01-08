@@ -2,6 +2,15 @@
 
 This guide provides detailed instructions for setting up a development environment for Azure Functions on Apple silicon using Docker. The example uses Python and includes a sample "Hello World" endpoint, but the setup can be adapted for other programming languages.
 
+We use Nginx as a reverse proxy to set up CORS settings for local development. This is primarily due to current limitations with running Azure Functions on Apple silicon and no good way to set CORS in the Dockerfile to allow local development with other applications (for example, your apps front-end).
+
+## Application Structure
+
+- The root directory contains the Docker and Nginx configuration files.
+- The `hello-world` folder contains the Azure Function:
+  - `__init__.py`: The Python file with the "Hello World" Azure Function.
+  - `function.json`: Configuration for the function, specifying the trigger and bindings.
+
 ## Prerequisites
 
 - A Mac with M2 chip.
@@ -10,7 +19,7 @@ This guide provides detailed instructions for setting up a development environme
 
 If you don't have homebrew, you can find instructions on how to install it [here](https://brew.sh/).
 
-## Installation Steps
+## Install Dependencies
 
 Follow these steps to prepare your environment for running Azure Functions on an Apple silicon Macbook. Skip any steps if the software is already installed.
 
@@ -45,45 +54,49 @@ Follow these steps to prepare your environment for running Azure Functions on an
     - Navigate to Preferences > Experimental Features.
     - Enable Use Rosetta for x86/amd64 emulation on Apple Silicon.
 
-4.  Clone the Repository
+## Download the Code
 
-    Get the sample Azure Functions application.
+Download this sample Azure Functions application that takes advantage of Docker and Nginx for local development.
+
+```shell
+git clone https://github.com/onwardplatforms/azure-functions-apple-arm-chip-starter.git
+```
+
+## Build and Run the Application
+
+1.  Build the App
 
     ```shell
-    git clone https://github.com/onwardplatforms/azure-functions-apple-arm-chip-starter.git
+    docker-compose --build --no-cache
     ```
 
-5.  Run the Application Using Docker Compose
-
-    Navigate to the project directory and start the services.
+2.  Run the App
 
     ```shell
-    docker-compose up -d --build --no-cache
+    docker-compose up -d
     ```
 
-## Application Structure
+    If you do not wish to run the application in "detached mode", simply remove the `-d` flag.
 
-- The root directory contains the Docker and Nginx configuration files.
-- The `hello`` folder contains the Azure Function:
-  - `__init__.py`: The Python file with the "Hello World" Azure Function.
-  - `function.json`: Configuration for the function, specifying the trigger and bindings.
+3.  Verify the Containers are Running
 
-## Running the Application
+    ```shell
+    docker ps
+    ```
 
-1. Start the Application: Run `docker-compose up` to initiate the Azure Functions and Nginx containers. If you changed your api code, be sure to add the flags `--build` and `--no-cache`. If you wnat to run the Docker container in the background using "detached mode", also provide the `-d` flag.
-2. Verify Containers: Confirm the running containers using `docker ps`. You should see both Nginx and Azure Functions.
+    You should see both Nginx and Azure Functions.
 
 ## Test the Function
 
 To trigger the HTTP function running in the container, run `http://localhost/hello`. Use the optional query parameter `name` to personalize the greeting.`
 
-## Customization for Other Languages
+## Start Developing
 
-While this example uses Python, you can easily modify the Dockerfile and Azure Functions configuration to support other programming languages. The containerization aspect remains consistent across different languages.
+Now that you have Azure Functions running from your container, you can start to develop new functions (endpoints) for your app.
 
-## Nginx for Local CORS Configuration
+Remember, if you change function code, you will need to re-run `docker-compose --build --no-cache` to ensure your changes are reflected.
 
-We use Nginx as a reverse proxy to set up CORS settings for local development. This setup is crucial as direct Azure Functions in Docker might have limitations in configuring CORS.
+To learn more about developing Azure Functions with Python, see the official [Microsoft Documentation](https://learn.microsoft.com/en-us/azure/azure-functions/create-first-function-vs-code-python?pivots=python-mode-decorators). If you decide to go with another language, you can go to the same link, but pick another language in the navigation tree under "Quickstarts".
 
 ## Shutting Down
 
@@ -92,18 +105,6 @@ To stop and remove the containers:
 ```shell
 docker-compose down
 ```
-
-## Troubleshooting
-
-### Docker Not Running
-
-`Cannot connect to the Docker daemon at unix:///Users/justinoconnor/.docker/run/docker.sock. Is the docker daemon running?`
-
-To resolve this, open your app tray and start docker.
-
-### Port Conflict
-
-`Bind for 0.0.0.0:8080 failed: port is already allocated`
 
 ## Summary
 
