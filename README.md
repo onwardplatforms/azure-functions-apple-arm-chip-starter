@@ -67,7 +67,7 @@ git clone https://github.com/onwardplatforms/azure-functions-apple-arm-chip-star
 1.  Build the App
 
     ```shell
-    docker-compose --build --no-cache
+    docker-compose build --no-cache
     ```
 
 2.  Run the App
